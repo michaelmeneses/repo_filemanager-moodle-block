@@ -587,7 +587,7 @@ function displaydir($wdir) {
 }
 
 function displayfiledir($wdir) {
-    // $wdir == / or /a or /a/b/c/d  etc
+    // Data: $wdir == / or /a or /a/b/c/d  etc.
     global $USER, $CFG, $OUTPUT;
     global $repo, $repoid, $dataparams, $formparams, $linkparams, $shortpath, $hiderepolist;
     $allfiles = $repo->get_directory_listing($wdir);
@@ -818,7 +818,8 @@ function is_zipfile($file) {
  * @param array $descriptions Array of strings to be printed out before each file bit.
  * @param boolean $uselabels -Whether to output text fields for file descriptions or not (optional, defaults to false)
  * @param array $labelnames Array of element names to use for labels (optional, defaults to LABEL_n)
- * @param int $coursebytes $coursebytes and $maxbytes are used to calculate upload max size ( using {@link get_max_upload_file_size})
+ * @param int $coursebytes $coursebytes and $maxbytes are used to calculate upload max size
+ *    ( using {@link get_max_upload_file_size})
  * @param int $modbytes $coursebytes and $maxbytes are used to calculate upload max size ( using {@link get_max_upload_file_size})
  * @param boolean $return -Whether to return the string (defaults to false - string is echoed)
  * @return string Form returned as string if $return is true
@@ -888,11 +889,14 @@ function searchabledisplay($wdir) {
             echo "</tr><tr>";
             $loop = 0;
         }
+    }    // Need for Moodle 2.8 and lower compat
+    if (method_exists($editor, "set_text")) {
+        $editor->set_text($value);
     }
     echo "</tr></table>";
 }
 
-/**
+/*
  * Prints a basic textarea field.
  *
  * When using this function, you should
@@ -900,8 +904,10 @@ function searchabledisplay($wdir) {
  * @global object
  * @param int $rows Number of rows to display  (minimum of 10 when $height is non-null)
  * @param int $cols Number of columns to display (minimum of 65 when $width is non-null)
- * @param null $width (Deprecated) Width of the element; if a value is passed, the minimum value for $cols will be 65. Value is otherwise ignored.
- * @param null $height (Deprecated) Height of the element; if a value is passe, the minimum value for $rows will be 10. Value is otherwise ignored.
+ * @param null $width (Deprecated) Width of the element; if a value is passed,
+ *     the minimum value for $cols will be 65. Value is otherwise ignored.
+ * @param null $height (Deprecated) Height of the element; if a value is passed,
+ *     the minimum value for $rows will be 10. Value is otherwise ignored.
  * @param string $name Name to use for the textarea element.
  * @param string $value Initial content to display in the textarea.
  * @param int $obsolete deprecated
@@ -910,8 +916,9 @@ function searchabledisplay($wdir) {
  * @return string|void depending on the value of $return
  */
 
-function block_repo_filemanager_print_textarea($rows, $cols, $width, $height, $name, $value='', $obsolete=0, $return=false, $id='') {
-    // $width and height are legacy fields and no longer used as pixels like they used to be.
+function block_repo_filemanager_print_textarea($rows, $cols, $width, $height, $name, $value='',
+    $obsolete=0, $return=false, $id='') {
+    // The $width and height params are legacy fields and no longer used as pixels like they used to be.
     // However, you can set them to zero to override the mincols and minrows values below.
 
     global $CFG;
