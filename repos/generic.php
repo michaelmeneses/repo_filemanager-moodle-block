@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>
 
+defined('MOODLE_INTERNAL') || die();
 require_once('block_repofile_type.php');
 
 /**
@@ -24,9 +25,9 @@ require_once('block_repofile_type.php');
  *
  */
 class block_repofile_generic extends block_repofile_type {
-    var $baserepo;
-    var $lastref;
-    var $cacheddata;
+    private $baserepo;
+    private $lastref;
+    private $cacheddata;
 
     public function __construct($base) {
         $this->baserepo = $base;
@@ -35,13 +36,8 @@ class block_repofile_generic extends block_repofile_type {
     /**
      * Recursively gets all the subfiles and directories represented by the initial list of files
      * @return all the files
-     *
      */
     public function get_all_paths($filelist, $level = 0) {
-        //foreach($filelist as $f)
-        //{
-        // echo $f;
-        //}
         return array();
     }
 
@@ -66,48 +62,31 @@ class block_repofile_generic extends block_repofile_type {
     public function get_nav_links($wdir, $choose) {
         global $COURSE;
         $rpdata = $this->get_list_data($wdir);
-        /***Moodle sometimes returns the same path for index 0 and index 1, when index 1 should point at the default
-         page, detect this here and set the path for index 1 to an empty string if the paths match***/
-        //if ($rpdata['path'][0]['path']==$rpdata['path'][1]['path'])
-        // $rpdata['path'][1]['path']="";
-        /*
-        foreach ($rpdata['path'] as $keya => $valuea)
-        {
-        echo "---->".$keya."<br />";
-        foreach ($valuea as $keyb => $valueb)
-          echo $keyb.':'.$valueb.'<br />';
-        echo '<br /><br />';
-        }
-        */
         $navlinks = array();
-        if (!isset($rpdata['path'])) return $navlinks;
+        if (!isset($rpdata['path'])) {
+            return $navlinks;
+        }
         foreach ($rpdata['path'] as $key => $value) {
             $link = $value['path'];
-            $navlinks[] = array('name' => $value['name'], 'link' => "?id=$COURSE->id&amp;choose=$choose&amp;wdir=$link", 'type' => 'misc');
+            $navlinks[] = array('name' => $value['name'],
+                'link' => "?id=$COURSE->id&amp;choose=$choose&amp;wdir=$link",
+                'type' => 'misc');
         }
         return $navlinks;
     }
 
     public function get_directory_listing($wdir) {
         global $CFG;
-        //$this->get_path($wdir);
-        //echo '<br /><br />';
         $rpdata = $this->get_list_data($wdir);
-        //foreach ($rpdata as $key => $value)
-        //    echo $key.':'.$value.'<br />';
-        //echo '<br /><br />';
         $data = new stdclass();
         $data->dirlist = array();
         $data->filelist = array();
         foreach ($rpdata['list'] as $item) {
-            //foreach ($item as $key => $value)
-            // echo $key.':'.$value.'<br />';
-            //foreach ($item['children'] as $key => $value)
-            // echo $key.':'.$value.'<br />';
-            if (array_key_exists('path', $item) && $item['path']) $data->dirlist[] = $this->process_directory_direnntry($item);
-            else $data->filelist[] = $this->process_directory_fileentry($item);
-            //echo '<br />';
-            
+            if (array_key_exists('path', $item) && $item['path']) {
+                $data->dirlist[] = $this->process_directory_direnntry($item);
+            } else {
+                $data->filelist[] = $this->process_directory_fileentry($item);
+            }
         }
         return $data;
     }
@@ -130,17 +109,24 @@ class block_repofile_generic extends block_repofile_type {
         $uns = unserialize(base64_decode($item['source']));
 
         if ($uns['filearea'] == "private") {
-        $entry->fileurl = $CFG->wwwroot . "/pluginfile.php/" . $uns['contextid'] . "/" . $uns['component'] . "/" . $uns['filearea'] . "/" . rawurlencode($uns['filename']);
+            $entry->fileurl = $CFG->wwwroot . "/pluginfile.php/" . $uns['contextid'] . "/" .
+                $uns['component'] . "/" . $uns['filearea'] . "/" . rawurlencode($uns['filename']);
         } else {
-            $entry->fileurl = $CFG->wwwroot . "/pluginfile.php/" . $uns['contextid'] . "/" . $uns['component'] . "/" . $uns['filearea'] . "/" . $uns['itemid'] . "/" . rawurlencode($uns['filename']);
+            $entry->fileurl = $CFG->wwwroot . "/pluginfile.php/" . $uns['contextid'] . "/" .
+                $uns['component'] . "/" . $uns['filearea'] . "/" . $uns['itemid'] . "/" . rawurlencode($uns['filename']);
         }
         $entry->filepath = $item['source'];
         $entry->filesafe = rawurlencode($item['title']);
         $entry->filesize = $item['size'];
         /***Some of the repos don't return the file size/date, so try to get it straight from the database***/
-        if ($item['size'] == 0 || empty($item['date']) && (isset($uns['contextid']) && isset($uns['filearea']) && isset($uns['component']))) {
+        if ($item['size'] == 0 || empty($item['date']) &&
+            (isset($uns['contextid']) && isset($uns['filearea']) && isset($uns['component']))) {
             global $DB;
-            $data = array("contextid" => $uns['contextid'], "filearea" => $uns['filearea'], "component" => $uns['component'], "filename" => $uns['filename'], "filepath" => $uns['filepath']);
+            $data = array("contextid" => $uns['contextid'],
+                "filearea" => $uns['filearea'],
+                "component" => $uns['component'],
+                "filename" => $uns['filename'],
+                "filepath" => $uns['filepath']);
             $rec = $DB->get_record("files", $data);
             if ($rec) {
                 $entry->filesize = $rec->filesize;
