@@ -295,13 +295,13 @@ class block_repofile_coursefilearea extends block_repofile_type {
         return "";
     }
 
-    function zip_files_main($originalfiles, $destination) {
+    private function zip_files_main($originalfiles, $destination) {
 
         // Extract everything from destination.
-        $path_parts = pathinfo(cleardoubleslashes($destination));
-        $destpath = $path_parts["dirname"];       //The path of the zip file
-        $destfilename = $path_parts["basename"];  //The name of the zip file
-        $extension = $path_parts["extension"];    //The extension of the file
+        $pathparts = pathinfo(cleardoubleslashes($destination));
+        $destpath = $pathparts["dirname"];       // The path of the zip file.
+        $destfilename = $pathparts["basename"];  // The name of the zip file.
+        $extension = $pathparts["extension"];    // The extension of the file.
 
         // If no file, error.
         if (empty($destfilename)) {
@@ -326,13 +326,13 @@ class block_repofile_coursefilearea extends block_repofile_type {
 
         // Now check and prepare every file.
         $files = array();
-        $origpath = NULL;
+        $origpath = null;
 
         foreach ($originalfiles as $file) {  // Iterate over each file.
             // Check for every file.
             $tempfile = cleardoubleslashes($file); // no doubleslashes!
             // Calculate the base path for all files if it isn't set.
-            if ($origpath === NULL) {
+            if ($origpath === null) {
                 $origpath = rtrim(cleardoubleslashes(dirname($tempfile)), "/");
             }
             // See if the file is readable.
@@ -348,8 +348,8 @@ class block_repofile_coursefilearea extends block_repofile_type {
         }
 
         $zipfiles = array();
-        $start = strlen($origpath)+1;
-        foreach($files as $file) {
+        $start = strlen($origpath) + 1;
+        foreach ($files as $file) {
             $zipfiles[substr($file, $start)] = $file;
         }
 
@@ -366,12 +366,12 @@ class block_repofile_coursefilearea extends block_repofile_type {
         return "";
     }
 
-    function unzip_file_main($zipfile, $destination = '', $showstatus_ignored = true) {
+    private function unzip_file_main($zipfile, $destination = '') {
         // Extract everything from zipfile.
-        $path_parts = pathinfo(cleardoubleslashes($zipfile));
-        $zippath = $path_parts["dirname"];       //The path of the zip file
-        $zipfilename = $path_parts["basename"];  //The name of the zip file
-        $extension = $path_parts["extension"];    //The extension of the file
+        $pathparts = pathinfo(cleardoubleslashes($zipfile));
+        $zippath = $pathparts["dirname"];       // The path of the zip file.
+        $zipfilename = $pathparts["basename"];  // The name of the zip file.
+        $extension = $pathparts["extension"];    // The extension of the file.
 
         // If no file, error.
         if (empty($zipfilename)) {

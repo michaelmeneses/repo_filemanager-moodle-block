@@ -160,9 +160,12 @@ switch ($action) {
             $struploadthisfile = get_string("uploadthisfile");
             $strmaxsize = get_string("maxsize", "", $filesize);
             $strcancel = get_string("cancel");
-            echo "<p>$struploadafile ($strmaxsize) --> <b>$wdir</b></p>\n" .
-            "<form enctype=\"multipart/form-data\" method=\"post\" action=\"index.php\">\n" .
-            "<div>\n" . "<table><tr><td colspan=\"2\">\n" . " <input type=\"hidden\" name=\"repoid\" value=\"" .
+            echo "<script type=\"text/javascript\" src=\"upload.js\"></script>\n".
+            "<p>$struploadafile ($strmaxsize) --> <b>$wdir</b></p>\n" .
+            "<form enctype=\"multipart/form-data\" method=\"post\" action=\"index.php\" id=\"uploadform\">\n" .
+            " <input type=\"hidden\" value=\"uploadform\" name=\"".ini_get("session.upload_progress.name")."\" />\n".
+            "<p>\n" .
+            " <input type=\"hidden\" name=\"repoid\" value=\"" .
             $repoid . "\" />\n" . $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />\n" .
             " <input type=\"hidden\" name=\"action\" value=\"upload\" />\n" .
             " <input type=\"hidden\" name=\"sesskey\" value=\"$USER->sesskey\" />\n";
@@ -170,12 +173,20 @@ switch ($action) {
             upload_print_form_fragment_old(1, array('userfile'), null, false, null,
             get_max_upload_file_size($repo->max_upload_bytes()), 0, false);
 
-            echo " </td></tr></table>\n" . " <input type=\"submit\" name=\"save\" value=\"$struploadthisfile\" />\n" .
-            "</div>\n" . "</form>\n" . "<form action=\"index.php\" method=\"get\">\n" .
+            echo "</p><p><input type=\"submit\" name=\"save\" value=\"$struploadthisfile\" /></p>\n" .
+            "</form>\n" .
+            "<div id=\"bar_blank\">\n".
+            " <div id=\"bar_color\"></div>\n".
+            " <div id=\"status\"></div>\n".
+            "</div>".
+            "<iframe id=\"hidden_iframe\" name=\"hidden_iframe\" src=\"about:blank\"></iframe>\n";
+
+            echo "<form action=\"index.php\" method=\"get\">\n" .
             "<div>\n" . " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />\n" .
             $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />\n" .
             " <input type=\"hidden\" name=\"action\" value=\"cancel\" />\n" .
-            " <input type=\"submit\" value=\"$strcancel\" />\n" . "</div>\n" . "</form>\n";
+            " <p><br /><br /><input type=\"submit\" value=\"$strcancel\" /></p>\n" . "</div>\n" . "</form>\n";
+
         }
         break;
     case "delete":
