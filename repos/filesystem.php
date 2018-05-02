@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once('generic.php');
 
 /**
@@ -41,9 +43,6 @@ class block_repofile_filesystem extends block_repofile_generic {
         $entry = new stdclass();
         $entry->name = $item['title'];
         $entry->filedate = $item['date'];
-        // ... $uns=unserialize(base64_decode($item['source']));
-        // ... foreach ($uns as $key => $value)
-        // ... echo $key.':'.$value.'<br />';
         $entry->fileurl = $CFG->wwwroot . "/blocks/repo_filemanager/index.php?id=" . $COURSE->id .
         "&noview=1&repoid=" . $this->baserepo->id;
         $entry->filepath = $item['source'];
