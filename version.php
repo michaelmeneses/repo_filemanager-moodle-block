@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-$plugin->version = 2016120601;
-$plugin->requires = 2013111800;
-$plugin->release = "2016120601";
+defined('MOODLE_INTERNAL') || die();
+
+$plugin->version = 2018050201;
+$plugin->requires = 2018042700;
+$plugin->release = "2018050201";
 $plugin->maturity = MATURITY_STABLE;
 $plugin->component = "block_repo_filemanager";
