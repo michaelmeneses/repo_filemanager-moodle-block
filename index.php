@@ -933,10 +933,6 @@ function block_repo_filemanager_print_textarea($rows, $cols, $width, $height, $n
 
     editors_head_setup();
     $editor = editors_get_preferred_editor(FORMAT_HTML);
-    // Need for Moodle 2.8 and lower compat
-    if (method_exists($editor, "set_text")) {
-        $editor->set_text($value);
-    }
     $editor->use_editor($id, array('legacy' => true));
 
     $str .= "\n".'<textarea class="form-textarea" id="'. $id .'" name="'. $name
