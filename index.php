@@ -27,13 +27,13 @@ $wdir = optional_param('wdir', '', PARAM_PATH);
 $action = optional_param('action', '', PARAM_ACTION);
 $name = optional_param('name', '', PARAM_FILE);
 $oldname = optional_param('oldname', '', PARAM_FILE);
-$choose = optional_param('choose', '', PARAM_FILE); //In fact it is always 'formname.inputname'.
+$choose = optional_param('choose', '', PARAM_FILE); // In fact it is always 'formname.inputname'.
 $save = optional_param('save', 0, PARAM_BOOL);
 $text = optional_param('textdata', '', PARAM_RAW);
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $listonly = optional_param('listonly', 3, PARAM_INT);
 $itemid = optional_param('itemid', SYSCONTEXTID, PARAM_INT);
-$client_id = optional_param('client_id', '', PARAM_ALPHANUM);
+$clientid = optional_param('client_id', '', PARAM_ALPHANUM);
 $savepath = optional_param('savepath', '', PARAM_PATH);
 $draftpath = optional_param('draftpath', '', PARAM_PATH);
 $contextid = optional_param('ctx_id', SYSCONTEXTID, PARAM_INT);
@@ -109,9 +109,11 @@ $repoid = optional_param('repoid', $firstmr, PARAM_INT);
 
 // Find the requested repo, use current if it can't be found.
 $repoi = false;
-foreach ($repoinstances as $instance) if ($instance->id == $repoid) {
-    $repoi = $instance;
-    break;
+foreach ($repoinstances as $instance) {
+    if ($instance->id == $repoid) {
+        $repoi = $instance;
+        break;
+    }
 }
 if ($repoi == false) {
     reset($repoinstances);
@@ -123,18 +125,18 @@ if ($repoi == false) {
 $repo = get_repomanager_instance($repoi, $course);
 
 // Common parameters for all urls.
-$data_params = array('id' => $id, 'choose' => $choose, 'listonly' => $listonly, 'itemid' => $itemid,
-'shortpath' => $shortpath, 'client_id' => $client_id, 'draftpath' => $draftpath, 'savepath' => $savepath,
+$dataparams = array('id' => $id, 'choose' => $choose, 'listonly' => $listonly, 'itemid' => $itemid,
+'shortpath' => $shortpath, 'client_id' => $clientid, 'draftpath' => $draftpath, 'savepath' => $savepath,
 'ctx_id' => $contextid, 'hiderepolist' => $hiderepolist);
-$form_params = "";
-$link_params = "";
+$formparams = "";
+$linkparams = "";
 
-foreach ($data_params as $key => $value) {
-    $form_params .= "<input type=\"hidden\" name=\"" . $key . "\" value=\"" . $value . "\" />\n";
-    $link_params .= $key . "=" . $value . "&amp;";
+foreach ($dataparams as $key => $value) {
+    $formparams .= "<input type=\"hidden\" name=\"" . $key . "\" value=\"" . $value . "\" />\n";
+    $linkparams .= $key . "=" . $value . "&amp;";
 }
 
-$PAGE->set_url('/blocks/repo_filemanager/index.php?' . $link_params);
+$PAGE->set_url('/blocks/repo_filemanager/index.php?' . $linkparams);
 
 // End of configuration and access control.
 
@@ -161,7 +163,7 @@ switch ($action) {
             echo "<p>$struploadafile ($strmaxsize) --> <b>$wdir</b></p>\n" .
             "<form enctype=\"multipart/form-data\" method=\"post\" action=\"index.php\">\n" .
             "<div>\n" . "<table><tr><td colspan=\"2\">\n" . " <input type=\"hidden\" name=\"repoid\" value=\"" .
-            $repoid . "\" />\n" . $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />\n" .
+            $repoid . "\" />\n" . $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />\n" .
             " <input type=\"hidden\" name=\"action\" value=\"upload\" />\n" .
             " <input type=\"hidden\" name=\"sesskey\" value=\"$USER->sesskey\" />\n";
 
@@ -171,7 +173,7 @@ switch ($action) {
             echo " </td></tr></table>\n" . " <input type=\"submit\" name=\"save\" value=\"$struploadthisfile\" />\n" .
             "</div>\n" . "</form>\n" . "<form action=\"index.php\" method=\"get\">\n" .
             "<div>\n" . " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />\n" .
-            $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />\n" .
+            $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />\n" .
             " <input type=\"hidden\" name=\"action\" value=\"cancel\" />\n" .
             " <input type=\"submit\" value=\"$strcancel\" />\n" . "</div>\n" . "</form>\n";
         }
@@ -199,9 +201,9 @@ switch ($action) {
                 require_once($CFG->dirroot . '/mod/resource/lib.php');
 
                 $optionsyes = array_merge(array('id' => $id, 'repoid' => $repoid, 'wdir' => $wdir,
-                'action' => 'delete', 'confirm' => 1, 'sesskey' => sesskey()), $data_params);
+                'action' => 'delete', 'confirm' => 1, 'sesskey' => sesskey()), $dataparams);
                 $optionsno = array_merge(array('id' => $id, 'repoid' => $repoid, 'wdir' => $wdir, 'action' => 'cancel'),
-                $data_params);
+                $dataparams);
                 $buttoncontinue = new single_button(new moodle_url('index.php', $optionsyes), get_string('yes'), 'post');
                 $buttoncancel = new single_button(new moodle_url('index.php', $optionsno), get_string('no'), 'post');
                 echo $OUTPUT->confirm(get_string('deletecheckfiles'), $buttoncontinue, $buttoncancel);
@@ -242,7 +244,7 @@ switch ($action) {
             html_header($course, $wdir, "form.name");
             echo "<p>$strrenamefileto:</p>" . "<table><tr><td>" . "<form action=\"index.php\" method=\"post\">" .
             "<fieldset class=\"invisiblefieldset\">" . " <input type=\"hidden\" name=\"repoid\" value=\"" .
-            $repoid . "\" />" . $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+            $repoid . "\" />" . $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
             " <input type=\"hidden\" name=\"action\" value=\"rename\" />" .
             " <input type=\"hidden\" name=\"oldname\" value=\"$file\" />" .
             " <input type=\"hidden\" name=\"sesskey\" value=\"$USER->sesskey\" />" .
@@ -250,7 +252,7 @@ switch ($action) {
             " <input type=\"submit\" value=\"$strrename\" />" . "</fieldset>" .
             "</form>" . "</td><td>\n" . "<form action=\"index.php\" method=\"get\">" .
             "<div>" . " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" .
-            $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+            $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
             " <input type=\"hidden\" name=\"action\" value=\"cancel\" />" .
             " <input type=\"submit\" value=\"$strcancel\" />" . "</div>" . "</form>" . "</td></tr></table>";
         }
@@ -267,13 +269,13 @@ switch ($action) {
             html_header($course, $wdir, "form.name");
             echo "<p>$strcreatefolder:</p>" . "<table><tr><td>" . "<form action=\"index.php\" method=\"post\">" .
             "<fieldset class=\"invisiblefieldset\">" . " <input type=\"hidden\" name=\"repoid\" value=\"" .
-            $repoid . "\" />" . $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+            $repoid . "\" />" . $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
             " <input type=\"hidden\" name=\"action\" value=\"makedir\" />" . " <input type=\"text\" name=\"name\" size=\"35\" />" .
             " <input type=\"hidden\" name=\"sesskey\" value=\"$USER->sesskey\" />" .
             " <input type=\"submit\" value=\"$strcreate\" />" . "</fieldset>" . "</form>" .
             "</td><td>" . "<form action=\"index.php\" method=\"get\">" . "<div>" .
             " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" .
-            $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+            $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
             " <input type=\"hidden\" name=\"action\" value=\"cancel\" />" .
             " <input type=\"submit\" value=\"$strcancel\" />" . "</div>" . "</form>" . "</td></tr></table>";
         }
@@ -289,7 +291,7 @@ switch ($action) {
 
             $OUTPUT->heading("$streditfile");
             echo "<form action=\"index.php\" method=\"post\">" . "<div style=\"text-align:center\">" .
-            " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" . $form_params .
+            " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" . $formparams .
             " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
             " <input type=\"hidden\" name=\"file\" value=\"$file\" />" .
             " <input type=\"hidden\" name=\"action\" value=\"edit\" />" .
@@ -300,7 +302,7 @@ switch ($action) {
             echo "<br /><br /><input type=\"submit\" value=\"" . get_string("savechanges") . "\" />" . "</form><br /><br />".
             "<form action=\"index.php\" method=\"get\">" .
             " <input type=\"hidden\" name=\"repoid\" value=\"" .
-            $repoid . "\" />" . $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+            $repoid . "\" />" . $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
             " <input type=\"hidden\" name=\"action\" value=\"cancel\" />" . " <input type=\"submit\" value=\""
             . get_string("cancel") . "\" />" . "</div>" . "</form>";
 
@@ -325,14 +327,14 @@ switch ($action) {
                 echo "<br />" . "<p style=\"text-align:center;\">" . get_string("whattocallzip") . "</p>" . "<table><tr><td>" .
                 "<form action=\"index.php\" method=\"post\">" . "<fieldset class=\"invisiblefieldset\">" .
                 " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" .
-                $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+                $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
                 " <input type=\"hidden\" name=\"action\" value=\"zip\" />" .
                 " <input type=\"text\" name=\"name\" size=\"35\" value=\"new.zip\" />" .
                 " <input type=\"hidden\" name=\"sesskey\" value=\"$USER->sesskey\" />" .
                 " <input type=\"submit\" value=\"" . get_string("createziparchive") . "\" />" .
                 "</fieldset>" . "</form>" . "</td><td>" . "<form action=\"index.php\" method=\"get\">" .
                 "<div>" . " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" .
-                $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+                $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
                 " <input type=\"hidden\" name=\"action\" value=\"cancel\" />" .
                 " <input type=\"submit\" value=\"" . get_string("cancel") . "\" />" .
                 "</div>" . "</form>" . "</td></tr></table>";
@@ -355,7 +357,7 @@ switch ($action) {
             }
             echo "<div style=\"text-align:center\"><form action=\"index.php\" method=\"get\">" .
             "<div>" . " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" .
-            $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+            $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
             " <input type=\"hidden\" name=\"action\" value=\"cancel\" />" .
             " <input type=\"submit\" value=\"$strok\" />" . "</div>" . "</form>" . "</div>";
         } else {
@@ -399,7 +401,7 @@ switch ($action) {
                 echo "</table>";
             }
             echo "<br /><form action=\"index.php\" method=\"get\">" . "<div style=\"text-align:center\">" .
-            " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" . $form_params .
+            " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" . $formparams .
             " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
             " <input type=\"hidden\" name=\"action\" value=\"cancel\" />" .
             " <input type=\"submit\" value=\"$strok\" />" . "</div>" . "</form>";
@@ -434,11 +436,11 @@ html_footer();
 /****Display Functions****/
 
 function html_header($course, $wdir, $formfield = "") {
-    global $CFG, $ME, $PAGE, $OUTPUT, $repo, $repoinstances, $repoid, $form_params, $link_params, $noview, $data_params;
+    global $CFG, $ME, $PAGE, $OUTPUT, $repo, $repoinstances, $repoid, $formparams, $linkparams, $noview, $dataparams;
     $PAGE->set_pagelayout('base');
     $PAGE->blocks->show_only_fake_blocks();
-    $navlinks = $repo->get_nav_links($wdir, $data_params['choose']);
-    if ($data_params['choose']) {
+    $navlinks = $repo->get_nav_links($wdir, $dataparams['choose']);
+    if ($dataparams['choose']) {
         $fullnav = '';
         $i = 0;
         foreach ($navlinks as $navlink) {
@@ -455,8 +457,8 @@ function html_header($course, $wdir, $formfield = "") {
         $fullnav = str_replace('->', '&raquo;', format_string($course->shortname) . " -> " . $fullnav);
         $PAGE->set_title($fullnav);
         echo $OUTPUT->header();
-        $chooseparts = explode('.', $data_params['choose']);
-        if (count($chooseparts) == 2 && $data_params['choose'] != "mdl2") {
+        $chooseparts = explode('.', $dataparams['choose']);
+        if (count($chooseparts) == 2 && $dataparams['choose'] != "mdl2") {
 ?>
             <script type="text/javascript">
             //<![CDATA[
@@ -469,7 +471,7 @@ function html_header($course, $wdir, $formfield = "") {
             </script>
 
             <?php
-        } elseif (count($chooseparts) == 1) {
+        } else if (count($chooseparts) == 1) {
 ?>
             <script type="text/javascript">
             //<![CDATA[
@@ -483,11 +485,6 @@ function html_header($course, $wdir, $formfield = "") {
             <?php
         }
         echo '<div id="navbar"><h2>' . $fullnav . '</h2></div>';
-        //*********What to do about this ??*********
-        //if ($course->id == SITEID and $wdir != "/backupdata") {
-        //    print_heading(get_string("publicsitefileswarning3"), "center", 2);
-        //}
-
     } else {
         foreach ($navlinks as $navlink) {
             if (array_key_exists('name', $navlink)) {
@@ -514,11 +511,11 @@ function html_header($course, $wdir, $formfield = "") {
 }
 
 function print_repo_list() {
-    global $repoinstances, $form_params, $course, $repoid;
+    global $repoinstances, $formparams, $course, $repoid;
 
     echo "<table><tr><th>" . get_string("available_repo", "block_repo_filemanager") .
     ":</th>" . "<td><form method=\"post\" action=\"index.php\" id=\"selrepo\"><div>\n" .
-    $form_params . "<input type=\"hidden\" name=\"id\" value=\"" . $course->id . "\" />\n" .
+    $formparams . "<input type=\"hidden\" name=\"id\" value=\"" . $course->id . "\" />\n" .
     "<select name=\"repoid\" onchange=\"document.getElementById('selrepo').submit()\">\n";
     foreach ($repoinstances as $r) {
         $meta = $r->get_meta();
@@ -590,9 +587,9 @@ function displaydir($wdir) {
 }
 
 function displayfiledir($wdir) {
-    //  $wdir == / or /a or /a/b/c/d  etc
+    // $wdir == / or /a or /a/b/c/d  etc
     global $USER, $CFG, $OUTPUT;
-    global $repo, $repoid, $data_params, $form_params, $link_params, $shortpath, $hiderepolist;
+    global $repo, $repoid, $dataparams, $formparams, $linkparams, $shortpath, $hiderepolist;
     $allfiles = $repo->get_directory_listing($wdir);
     $dirlist = $allfiles->dirlist;
     $filelist = $allfiles->filelist;
@@ -622,7 +619,7 @@ function displayfiledir($wdir) {
         print_repo_list();
     }
     echo "<form action=\"index.php\" method=\"post\" id=\"dirform\">" . "<div>" .
-    " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" . $form_params .
+    " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" . $formparams .
     "<table border=\"0\" cellspacing=\"2\" cellpadding=\"2\" class=\"generaltable\" >" .
     "<tr>" . "<th class=\"header\" scope=\"col\"></th>" . "<th class=\"header\" scope=\"col\">$strname</th>" .
     "<th class=\"header\" scope=\"col\">$strsize</th>" . "<th class=\"header\" scope=\"col\">$strmodified</th>" .
@@ -641,7 +638,7 @@ function displayfiledir($wdir) {
                     print_cell();
                     // Alt attribute intentionally empty to prevent repetition in screen reader.
                     print_cell('left', '<a href="index.php?repoid=' . $repoid . '&amp;wdir=' .
-                    $fileurl . '&amp;' . $link_params . '">' .
+                    $fileurl . '&amp;' . $linkparams . '">' .
                     $OUTPUT->pix_icon('f/parent', '') . '&nbsp;' . get_string('parentfolder') . '</a>');
                     print_cell();
                     print_cell();
@@ -654,7 +651,7 @@ function displayfiledir($wdir) {
                 } else {
                     print_cell("center", "<input type=\"checkbox\" name=\"file$count\" value=\"$dir->filepath\" />");
                 }
-                print_cell("left", "<a href=\"index.php?repoid=$repoid&amp;wdir=$dir->filepath&amp;$link_params\">" .
+                print_cell("left", "<a href=\"index.php?repoid=$repoid&amp;wdir=$dir->filepath&amp;$linkparams\">" .
                 $OUTPUT->pix_icon('f/folder', $strfolder) . "&nbsp;" . htmlspecialchars($dir->name) . "</a>");
                 if ($dir->filesize > 0) {
                     print_cell("right", display_size($dir->filesize));
@@ -670,7 +667,7 @@ function displayfiledir($wdir) {
                     print_cell();
                 } else {
                     print_cell("right", "<a href=\"index.php?repoid=$repoid&amp;wdir=$wdir&amp;" .
-                    "file=$dir->filesafe&amp;action=rename&amp;$link_params\">$strrename</a>");
+                    "file=$dir->filesafe&amp;action=rename&amp;$linkparams\">$strrename</a>");
                 }
             }
             echo "</tr>";
@@ -701,15 +698,15 @@ function displayfiledir($wdir) {
             } else {
                 print_cell();
             }
-            if (strlen($data_params['choose']) > 0) {
-                if ($data_params['choose'] == "mdl2") {
+            if (strlen($dataparams['choose']) > 0) {
+                if ($dataparams['choose'] == "mdl2") {
                     $edittext = " <strong><a href=\"choosefile.php?fileurl=" . $file->filepath . "&amp;action=confirm&amp;" .
                      "draftpath=" .
-                    $data_params['draftpath'] . "&amp;savepath=" . $data_params['savepath'] . "&amp;filename=" . $file->filesafe .
+                    $dataparams['draftpath'] . "&amp;savepath=" . $dataparams['savepath'] . "&amp;filename=" . $file->filesafe .
                     "&amp;sesskey=" . $USER->sesskey . "&amp;repo_id=" . $repoid . "&amp;maxbytes=-1&amp;course=" .
-                    $data_params['id'] . "&amp;ctx_id=" . $data_params['contextid'] . "&amp;" .
-                    "&amp;env=filemanager&amp;itemid=" . $data_params['itemid'] . "&amp;client_id=" .
-                    $data_params['client_id'] . "\">" .
+                    $dataparams['id'] . "&amp;ctx_id=" . $dataparams['contextid'] . "&amp;" .
+                    "&amp;env=filemanager&amp;itemid=" . $dataparams['itemid'] . "&amp;client_id=" .
+                    $dataparams['client_id'] . "\">" .
                     $strchoose . "</a></strong>&nbsp;";
                 } else {
                     $edittext = " <strong><a onclick=\"return set_value('$selectfile')\" href=\"#\">$strchoose</a></strong>&nbsp;";
@@ -718,31 +715,28 @@ function displayfiledir($wdir) {
                 $edittext = '';
             }
             if (is_editable_type($file->name) && $repo->can_edit()) {
-                $edittext .= " <a href=\"index.php?repoid=$repoid&amp;wdir=$wdir&amp;file=$file->filepath&amp;action=edit&amp;$link_params\">$stredit</a>";
+                $edittext .= " <a href=\"index.php?repoid=$repoid&amp;wdir=$wdir&amp;file=$file->".
+                    "filepath&amp;action=edit&amp;$linkparams\">$stredit</a>";
             } else if (is_zipfile($file->name) && $repo->can_zip()) {
-                $edittext .= " <a href=\"index.php?repoid=$repoid&amp;wdir=$wdir&amp;file=$file->filepath&amp;action=unzip&amp;sesskey=$USER->sesskey&amp;$link_params\">$strunzip</a>&nbsp;";
-                $edittext .= " <a href=\"index.php?repoid=$repoid&amp;wdir=$wdir&amp;file=$file->filepath&amp;action=listzip&amp;sesskey=$USER->sesskey&amp;$link_params\">$strlist</a> ";
+                $edittext .= " <a href=\"index.php?repoid=$repoid&amp;wdir=$wdir&amp;file=$file->filepath".
+                    "&amp;action=unzip&amp;sesskey=$USER->sesskey&amp;$linkparams\">$strunzip</a>&nbsp;";
+                $edittext .= " <a href=\"index.php?repoid=$repoid&amp;wdir=$wdir&amp;file=$file->filepath&amp;action=listzip".
+                    "&amp;sesskey=$USER->sesskey&amp;$linkparams\">$strlist</a> ";
             }
             if ($repo->can_manage_files()) {
-                $edittext.= " <a href=\"index.php?repoid=$repoid&amp;wdir=$wdir&amp;file=$file->filesafe&amp;action=rename&amp;$link_params\">$strrename</a>";
+                $edittext .= " <a href=\"index.php?repoid=$repoid&amp;wdir=$wdir&amp;file=$file->filesafe".
+                    "&amp;action=rename&amp;$linkparams\">$strrename</a>";
             }
             print_cell("right", $edittext);
             echo "</tr>";
         }
     }
-    echo "</table>" . "<table border=\"0\" cellspacing=\"2\" cellpadding=\"2\">" . "<tr><td>" . $form_params . "<input type=\"hidden\" name=\"wdir\" value=\"$wdir\" /> " . "<input type=\"hidden\" name=\"repoid\" value=\"$repoid\" /> " . "<input type=\"hidden\" name=\"sesskey\" value=\"$USER->sesskey\" />";
-    /**
-     $options = array (
-     "move" => "$strmovetoanotherfolder",
-     "delete" => "$strdeletecompletely",
-     "zip" => "$strcreateziparchive"
-     );
-     *
-     */
+    echo "</table>" . "<table border=\"0\" cellspacing=\"2\" cellpadding=\"2\">" . "<tr><td>"
+        . $formparams . "<input type=\"hidden\" name=\"wdir\" value=\"$wdir\" /> "
+        . "<input type=\"hidden\" name=\"repoid\" value=\"$repoid\" /> "
+        . "<input type=\"hidden\" name=\"sesskey\" value=\"$USER->sesskey\" />";
+
     if (!empty($count)) {
-        // ... choose_from_menu ($options, "action", "", "$strwithchosenfiles...", "javascript:getElementById('dirform').submit()");
-        // ... echo html_writer::select($options, "action", "", "$strwithchosenfiles...");
-        // I can't work out how to get the html_writer to auto-submit the form, so write this manually for now.
         if ($repo->can_manage_files()) {
             echo '<select name="action" onchange="javascript:getElementById(\'dirform\').submit()">' .
             '<option selected="selected">' . $strwithchosenfiles . '...</option>' .
@@ -763,7 +757,7 @@ function displayfiledir($wdir) {
     if (!empty($USER->fileop) and ($USER->fileop == "move") and ($USER->filesource <> $wdir)) {
         echo "<form action=\"index.php\" method=\"get\">" . "<div>" .
         " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" .
-        $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+        $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
         " <input type=\"hidden\" name=\"action\" value=\"paste\" />" .
         " <input type=\"hidden\" name=\"sesskey\" value=\"$USER->sesskey\" />" .
         " <input type=\"submit\" value=\"$strmovefilestohere\" />" . "</div>" . "</form>";
@@ -772,7 +766,7 @@ function displayfiledir($wdir) {
     if ($repo->can_manage_files()) {
         echo "<td align=\"right\">" . "<form action=\"index.php\" method=\"get\">" . "<div>" .
         " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" .
-        $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+        $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
         " <input type=\"hidden\" name=\"action\" value=\"makedir\" />" .
         " <input type=\"submit\" value=\"$strmakeafolder\" />" . "</div>" .
         "</form>" . "</td>" . "<td align=\"right\">" . "<form action=\"index.php\" method=\"get\">" .
@@ -782,7 +776,7 @@ function displayfiledir($wdir) {
         "</fieldset>" . "</form>" . "</td>" . "<td align=\"right\">" .
         "<form action=\"index.php\" method=\"get\">" . "<div>" .
         " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" .
-        $form_params . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
+        $formparams . " <input type=\"hidden\" name=\"wdir\" value=\"$wdir\" />" .
         " <input type=\"hidden\" name=\"action\" value=\"upload\" />" .
         " <input type=\"submit\" value=\"$struploadafile\" />" . "</div>" . "</form>" . "</td>";
     } else {
@@ -791,7 +785,7 @@ function displayfiledir($wdir) {
     echo "</tr>" . "</table>";
 }
 
-/**
+/*
  * Checks to see if the file is a type which can be edited
  *
  */
@@ -803,7 +797,7 @@ function is_editable_type($file) {
     return false;
 }
 
-/**
+/*
  * Checks to see if this is a zip file
  *
  */
@@ -816,7 +810,7 @@ function is_zipfile($file) {
     return false;
 }
 
-/**
+/*
  * This function prints out a number of upload form elements.
  *
  * @param int $numfiles The number of elements required (optional, defaults to 1)
@@ -835,7 +829,7 @@ $labelnames = null, $coursebytes = 0, $modbytes = 0, $return = false) {
     global $CFG;
     $maxbytes = get_max_upload_file_size($CFG->maxbytes, $coursebytes, $modbytes);
     $str = '<input type="hidden" name="MAX_FILE_SIZE" value="' . $maxbytes . '" />' . "\n";
-    for ($i = 0;$i < $numfiles;$i++) {
+    for ($i = 0; $i < $numfiles; $i++) {
         if (is_array($descriptions) && !empty($descriptions[$i])) {
             $str .= '<strong>' . $descriptions[$i] . '</strong><br />';
         }
@@ -843,7 +837,8 @@ $labelnames = null, $coursebytes = 0, $modbytes = 0, $return = false) {
         $str .= '<input type="file" size="50" name="' . $name . '" alt="' . $name . '" /><br />' . "\n";
         if ($uselabels) {
             $lname = ((is_array($labelnames) && !empty($labelnames[$i])) ? $labelnames[$i] : 'LABEL_' . $i);
-            $str .= get_string('uploadlabel') . ' <input type="text" size="50" name="' . $lname . '" alt="' . $lname . '" /><br /><br />' . "\n";
+            $str .= get_string('uploadlabel')
+                . ' <input type="text" size="50" name="' . $lname . '" alt="' . $lname . '" /><br /><br />' . "\n";
         }
     }
     if ($return) {
@@ -854,13 +849,13 @@ $labelnames = null, $coursebytes = 0, $modbytes = 0, $return = false) {
 }
 
 function searchabledisplay($wdir) {
-    global $repo, $form_params, $repoid, $data_params, $USER;
+    global $repo, $formparams, $repoid, $dataparams, $USER;
     $repo->search("trains");
     $allfiles = $repo->get_directory_listing('');
     $filelist = $allfiles->filelist;
     $strchoose = get_string("choose");
     echo "<form action=\"index.php\" method=\"get\">" . "<div style=\"text-align:center\">" .
-    " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" . $form_params .
+    " <input type=\"hidden\" name=\"repoid\" value=\"" . $repoid . "\" />" . $formparams .
     " <input type=\"text\" name=\"" . $repo->is_searchable() . "\" value=\"\" />" .
     " <input type=\"submit\" value=\"" . get_string("search") . "\" />" . "</div>" . "</form><br />";
     echo "<table><tr>\n";
@@ -870,21 +865,21 @@ function searchabledisplay($wdir) {
         "<img src=\"" . $file->thumbnail . "\" width=\"" . $file->thumbnailw . "\" height=\"" .
         $file->thumbnailh . "\" alt=\"\" />\n" . "<br />" . $file->name . "\n";
 
-        if ($data_params->choose) {
+        if ($dataparams->choose) {
             echo "<form action=\"choosefile.php\" method=\"post\"><div>\n" .
             "<input type=\"hidden\" name=\"fileurl\" value=\"" . $file->filepath . "\" />\n" .
             "<input type=\"hidden\" name=\"action\" value=\"confirm\" />\n" .
-            "<input type=\"hidden\" name=\"draftpath\" value=\"" . $data_params['draftpath'] . "\" />\n" .
-            "<input type=\"hidden\" name=\"savepath\" value=\"" . $data_params['savepath'] . "\" />\n" .
+            "<input type=\"hidden\" name=\"draftpath\" value=\"" . $dataparams['draftpath'] . "\" />\n" .
+            "<input type=\"hidden\" name=\"savepath\" value=\"" . $dataparams['savepath'] . "\" />\n" .
             "<input type=\"hidden\" name=\"filename\" value=\"" . $file->filesafe . "\" />\n" .
             "<input type=\"hidden\" name=\"sesskey\" value=\"" . $USER->sesskey . "\" />\n" .
             "<input type=\"hidden\" name=\"repo_id\" value=\"" . $repoid . "\" />\n" .
             "<input type=\"hidden\" name=\"maxbytes\" value=\"-1\" />\n" .
-            "<input type=\"hidden\" name=\"course\" value=\"" . $data_params['id'] . "\" />\n" .
-            "<input type=\"hidden\" name=\"ctx_id\" value=\"" . $data_params['contextid'] . "\" />\n" .
+            "<input type=\"hidden\" name=\"course\" value=\"" . $dataparams['id'] . "\" />\n" .
+            "<input type=\"hidden\" name=\"ctx_id\" value=\"" . $dataparams['contextid'] . "\" />\n" .
             "<input type=\"hidden\" name=\"env\" value=\"filemanager\" />\n" .
-            "<input type=\"hidden\" name=\"itemid\" value=\"" . $data_params['itemid'] . "\" />\n" .
-            "<input type=\"hidden\" name=\"client_id\" value=\"" . $data_params['client_id'] . "\" />\n" .
+            "<input type=\"hidden\" name=\"itemid\" value=\"" . $dataparams['itemid'] . "\" />\n" .
+            "<input type=\"hidden\" name=\"client_id\" value=\"" . $dataparams['client_id'] . "\" />\n" .
             "<input type=\"submit\" value=\"" . $strchoose . "\" />\n" . "</div></form>\n";
         }
         echo "</td>\n";
@@ -916,11 +911,8 @@ function searchabledisplay($wdir) {
  */
 
 function block_repo_filemanager_print_textarea($rows, $cols, $width, $height, $name, $value='', $obsolete=0, $return=false, $id='') {
-    /// $width and height are legacy fields and no longer used as pixels like they used to be.
-    /// However, you can set them to zero to override the mincols and minrows values below.
-
-    // Disabling because there is not yet a viable $OUTPUT option for cases when mforms can't be used
-    // debugging('print_textarea() has been deprecated. You should be using mforms and the editor element.');
+    // $width and height are legacy fields and no longer used as pixels like they used to be.
+    // However, you can set them to zero to override the mincols and minrows values below.
 
     global $CFG;
 
@@ -945,10 +937,11 @@ function block_repo_filemanager_print_textarea($rows, $cols, $width, $height, $n
     if (method_exists($editor, "set_text")) {
         $editor->set_text($value);
     }
-    $editor->use_editor($id, array('legacy'=>true));
+    $editor->use_editor($id, array('legacy' => true));
 
-    $str .= "\n".'<textarea class="form-textarea" id="'. $id .'" name="'. $name .'" rows="'. $rows .'" cols="'. $cols .'" spellcheck="true">'."\n";
-    $str .= htmlspecialchars($value); // needed for editing of cleaned text!
+    $str .= "\n".'<textarea class="form-textarea" id="'. $id .'" name="'. $name
+        .'" rows="'. $rows .'" cols="'. $cols .'" spellcheck="true">'."\n";
+    $str .= htmlspecialchars($value); // Needed for editing of cleaned text!
     $str .= '</textarea>'."\n";
 
     if ($return) {
