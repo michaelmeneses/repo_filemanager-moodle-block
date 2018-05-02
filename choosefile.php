@@ -47,11 +47,11 @@ $contextid = optional_param('ctx_id', SYSCONTEXTID, PARAM_INT); // Context ID.
 $courseid = optional_param('course', SITEID, PARAM_INT); // Course ID.
 $filename = optional_param('filename', '', PARAM_FILE);
 $fileurl = optional_param('fileurl', '', PARAM_RAW);
-$repo_id = required_param('repo_id', PARAM_INT); // Repository ID.
+$repoid = required_param('repo_id', PARAM_INT); // Repository ID.
 $maxbytes = optional_param('maxbytes', 0, PARAM_INT); // Maxbytes.
 $author = optional_param('author', $USER->firstname . ' ' . $USER->lastname, PARAM_TEXT);
 $licence = optional_param('licence', $CFG->sitedefaultlicense, PARAM_TEXT);
-$client_id = optional_param('client_id', '', PARAM_ALPHANUM);
+$clientid = optional_param('client_id', '', PARAM_ALPHANUM);
 
 // The path to save files.
 $savepath = optional_param('savepath', '/', PARAM_PATH);
@@ -66,7 +66,7 @@ if (method_exists("context_user", "instance")) {
     $context = get_context_instance(CONTEXT_USER, $USER->id);
 }
 
-$PAGE->set_context($user_context);
+$PAGE->set_context($usercontext);
 if (!$course = $DB->get_record('course', array('id' => $courseid))) {
     print_error('invalidcourseid');
 }
@@ -74,15 +74,14 @@ $PAGE->set_course($course);
 // Init repository plugin.
 
 $sql = 'SELECT i.name, i.typeid, r.type FROM {repository} r, {repository_instances} i ' . 'WHERE i.id=? AND i.typeid=r.id';
-if ($repository = $DB->get_record_sql($sql, array($repo_id))) {
+if ($repository = $DB->get_record_sql($sql, array($repoid))) {
     $type = $repository->type;
     if (file_exists($CFG->dirroot . '/repository/' . $type . '/lib.php')) {
         require_once($CFG->dirroot . '/repository/' . $type . '/lib.php');
         $classname = 'repository_' . $type;
         try {
-            $repo = new $classname($repo_id, $contextid, array('ajax' => false, 'name' => $repository->name, 'type' => $type));
-        }
-        catch (repository_exception $e) {
+            $repo = new $classname($repoid, $contextid, array('ajax' => false, 'name' => $repository->name, 'type' => $type));
+        } catch (repository_exception $e) {
             print_error('pluginerror', 'repository');
         }
     } else {
@@ -91,8 +90,8 @@ if ($repository = $DB->get_record_sql($sql, array($repo_id))) {
 }
 
 $params = array('ctx_id' => $contextid, 'itemid' => $itemid, 'course' => $courseid,
-'maxbytes' => $maxbytes, 'sesskey' => sesskey(), 'client_id' => $client_id,
-'action' => 'browse', 'draftpath' => $draftpath, 'savepath' => $savepath, 'repo_id' => $repo_id);
+'maxbytes' => $maxbytes, 'sesskey' => sesskey(), 'client_id' => $clientid,
+'action' => 'browse', 'draftpath' => $draftpath, 'savepath' => $savepath, 'repo_id' => $repoid);
 
 $PAGE->set_url('/blocks/repo_filemanager/choosefile.php', $params);
 switch ($action) {
@@ -118,7 +117,7 @@ switch ($action) {
             "<div class=\"generalbox\"><p style=\"text-align:center;\">" . get_string("alldone", "block_repo_filemanager") .
             "</p>" . "<noscript><p style=\"text-align:center;\">(" . get_string("refresh", "block_repo_filemanager") .
             ")</p></noscript>" . "<p style=\"text-align:center;\">" . "<script type=\"text/javascript\">\n" .
-            "//<!--\n" . "window.opener.refresh_" . $client_id . "();\n" .
+            "//<!--\n" . "window.opener.refresh_" . $clientid . "();\n" .
             "document.writeln('<a href=\"javascript:window.close();\">" .
             get_string("closewindow", "block_repo_filemanager") . "</a>');\n" . "//-->\n" . "</script>" . "</p></div>";
             echo $OUTPUT->footer();
