@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 class block_repo_filemanager extends block_base {
     public function init() {
         $this->title = get_string('pluginname', 'block_repo_filemanager');
