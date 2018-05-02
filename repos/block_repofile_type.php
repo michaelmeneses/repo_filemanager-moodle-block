@@ -14,9 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 global $CFG;
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/adminlib.php');
+
 /**
  * Base class for a remote manageable Moodle repository type
  * @author Tim Williams (tmw@autotrain.org) for EA LLP 2010

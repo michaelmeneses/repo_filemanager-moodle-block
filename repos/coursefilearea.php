@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once("block_repofile_type.php");
 
 /**
@@ -23,8 +25,8 @@ require_once("block_repofile_type.php");
  *
  */
 class block_repofile_coursefilearea extends block_repofile_type {
-    var $course;
-    var $basedir;
+    private $course;
+    private $basedir;
 
     public function __construct($c) {
         global $DB, $CFG;
@@ -100,7 +102,7 @@ class block_repofile_coursefilearea extends block_repofile_type {
     public function get_parent_link($wdir) {
         $dn = dirname($wdir);
         if ($dn != ".") {
-            $fileurl = $this->checkURL($dn);
+            $fileurl = $this->check_url($dn);
         } else {
             $fileurl = "";
         }
@@ -110,7 +112,6 @@ class block_repofile_coursefilearea extends block_repofile_type {
     public function get_nav_links($wdir, $choose) {
         global $COURSE;
         $navlinks = array();
-        // $navlinks[] = array('name' => $course->shortname, 'link' => "../course/view.php?id=$COURSE->id", 'type' => 'misc');
         $strfiles = get_string("files");
         if ($wdir == "") {
             $navlinks[] = array('name' => $strfiles, 'link' => null, 'type' => 'misc');
@@ -119,9 +120,11 @@ class block_repofile_coursefilearea extends block_repofile_type {
             $numdirs = count($dirs);
             $link = "";
             $navlinks[] = array('name' => $strfiles, 'link' => "?id=$COURSE->id&amp;wdir=/&amp;choose=$choose", 'type' => 'misc');
-            for ($i = 1;$i < $numdirs - 1;$i++) {
-                $link.= "/" . urlencode($dirs[$i]);
-                $navlinks[] = array('name' => $dirs[$i], 'link' => "?id=$COURSE->id&amp;wdir=$link&amp;choose=$choose", 'type' => 'misc');
+            for ($i = 1; $i < $numdirs - 1; $i++) {
+                $link .= "/" . urlencode($dirs[$i]);
+                $navlinks[] = array('name' => $dirs[$i],
+                    'link' => "?id=$COURSE->id&amp;wdir=$link&amp;choose=$choose",
+                    'type' => 'misc');
             }
             $navlinks[] = array('name' => $dirs[$numdirs - 1], 'link' => null, 'type' => 'misc');
         }
@@ -147,12 +150,12 @@ class block_repofile_coursefilearea extends block_repofile_type {
             $entry->name = $file;
             $entry->filedate = filemtime("$fullpath/$file");
             if ($wdir == "") {
-                $entry->filepath = $this->checkURL($file);
+                $entry->filepath = $this->check_url($file);
             } else {
-                $entry->filepath = $this->checkURL($wdir) . "/" . $this->checkURL($file);
+                $entry->filepath = $this->check_url($wdir) . "/" . $this->check_url($file);
             }
             if (is_dir($fullpath . "/" . $file)) {
-                $entry->filesafe = $this->checkURL($file);
+                $entry->filesafe = $this->check_url($file);
                 $entry->filesize = get_directory_size("$fullpath/$file");
                 $data->dirlist[] = $entry;
             } else {
@@ -162,11 +165,11 @@ class block_repofile_coursefilearea extends block_repofile_type {
                     $urlst = $CFG->wwwroot . "/repository/coursefilearea/file.php?file=/";
                 }
                 if ($wdir == "") {
-                    $entry->fileurl = $urlst . $COURSE->id . "/" . $this->checkURL($wdir) . $this->checkURL($file);
+                    $entry->fileurl = $urlst . $COURSE->id . "/" . $this->check_url($wdir) . $this->check_url($file);
                 } else {
-                    $entry->fileurl = $urlst . $COURSE->id . "/" . $this->checkURL($wdir) . "/" . $this->checkURL($file);
+                    $entry->fileurl = $urlst . $COURSE->id . "/" . $this->check_url($wdir) . "/" . $this->check_url($file);
                 }
-                $entry->filesafe = $this->checkURL($file);
+                $entry->filesafe = $this->check_url($file);
                 $entry->filesize = filesize("$fullpath/$file");
                 $data->filelist[] = $entry;
             }
@@ -175,7 +178,7 @@ class block_repofile_coursefilearea extends block_repofile_type {
         return $data;
     }
 
-    public function checkURL($u) {
+    public function check_url($u) {
         if (!strpos($u, "/")) {
             return rawurlencode($u);
         }
@@ -192,7 +195,7 @@ class block_repofile_coursefilearea extends block_repofile_type {
         foreach ($filelist as $file) {
             $fullfile = $this->basedir . $file;
             if (!fulldelete($fullfile)) {
-                $message.= "<br />" . get_string('deleteerror', 'block_repo_filemanager') . ": $fullfile";
+                $message .= "<br />" . get_string('deleteerror', 'block_repo_filemanager') . ": $fullfile";
             }
         }
         return $message;
@@ -205,7 +208,7 @@ class block_repofile_coursefilearea extends block_repofile_type {
             $oldfile = $this->basedir . $file;
             $newfile = $this->basedir . $dest . "/" . $shortfile;
             if (!rename($oldfile, $newfile)) {
-                $message.= "<p class='error'>" . get_string('error') . ": $shortfile " .
+                $message .= "<p class='error'>" . get_string('error') . ": $shortfile " .
                 get_string('notmoved', 'block_repo_filemanager') . "</p>";
             }
         }
@@ -217,15 +220,12 @@ class block_repofile_coursefilearea extends block_repofile_type {
         $newname = str_replace(" ", "_", $this->basedir . clean_param($dir . "/" . $newname, PARAM_PATH));
         $oldname = $this->basedir . $dir . "/" . $oldname;
         if (file_exists($newname)) {
-            return "<p class='error'>" . get_string('error') . ": $name " . get_string('alreadyexists', 'block_repo_filemanager') . "!</p>";
+            return "<p class='error'>" . get_string('error') . ": $name "
+                . get_string('alreadyexists', 'block_repo_filemanager') . "!</p>";
         } else {
             if (!rename($oldname, $newname)) {
-                return "<p class='error'>" . get_string('error') . ": " . get_string('renameerror', 'block_repo_filemanager') . " $oldname " . get_string('to') . " $name</p>";
-            } else {
-                // Not sure what to do about this.
-                // ...file was renamed now update resources if needed
-                // ...require_once($CFG->dirroot.'/mod/resource/lib.php');
-                // ...resource_renamefiles($course, $wdir, $oldname, $name);
+                return "<p class='error'>" . get_string('error') . ": "
+                    . get_string('renameerror', 'block_repo_filemanager') . " $oldname " . get_string('to') . " $name</p>";
             }
             return "";
         }
@@ -248,19 +248,13 @@ class block_repofile_coursefilearea extends block_repofile_type {
 
     public function upload($destdir) {
         global $CFG, $COURSE;
-        $this->course->maxbytes = 0; // We are ignoring course limits
-        // Moodle 2.9 has removed the upload_manager class and chucks an error at you if you try to use it, so substitute our own here.
-        // Note: Using Moodle 2.8 version here, since here since the upload lib was copied from the and it stops the deprecated warning.
-        if ($CFG->version >= 2014111000) {
-            require_once ($CFG->dirroot . '/blocks/repo_filemanager/uploadlib.php');
-            $um = new block_repo_filemanger_upload_manager('userfile', false, false, $COURSE, false, 0);
-        } else {
-            require_once ($CFG->dirroot . '/lib/uploadlib.php');
-            $um = new upload_manager('userfile', false, false, $COURSE, false, 0);
-        }
+        $this->course->maxbytes = 0; // We are ignoring course limits.
+        require_once($CFG->dirroot . '/blocks/repo_filemanager/uploadlib.php');
+        $um = new block_repo_filemanger_upload_manager('userfile', false, false, $COURSE, false, 0);
+
         if ($um->process_file_uploads($this->basedir . $destdir)) {
-            $no_space = str_replace(" ", "_", clean_filename($um->get_new_filename()));
-            rename($this->basedir . $destdir . "/" . $um->get_new_filename(), $this->basedir . $destdir . "/" . $no_space);
+            $nospace = str_replace(" ", "_", clean_filename($um->get_new_filename()));
+            rename($this->basedir . $destdir . "/" . $um->get_new_filename(), $this->basedir . $destdir . "/" . $nospace);
             return get_string('uploadedfile');
         }
         return "";
@@ -273,7 +267,7 @@ class block_repofile_coursefilearea extends block_repofile_type {
 
     public function save_text($file, $text) {
         $fileptr = fopen($this->basedir . '/' . $file, "w");
-        $text = preg_replace('/\x0D/', '', $text); // ... http://moodle.org/mod/forum/discuss.php?d=38860
+        $text = preg_replace('/\x0D/', '', $text); // More Info: http://moodle.org/mod/forum/discuss.php?d=38860.
         fputs($fileptr, stripslashes($text));
         fclose($fileptr);
     }
