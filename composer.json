@@ -1,0 +1,10 @@
+{
+    "name": "tim1mw/moodle-block_repo_filemanager",
+    "type": "moodle-block",
+    "require": {
+        "composer/installers": "~1.0"
+    },
+    "extra": {
+        "installer-name": "repo_filemanager"
+    }
+}
